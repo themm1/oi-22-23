@@ -1,0 +1,143 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=1in,footskip=0.25in]{geometry}
+\usepackage[final]{microtype}
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{pythonhighlight}
+
+\title{\vspace{-3cm}Hvieznde impérium}
+
+\vspace{0pt}
+\begin{document}
+\author{}
+\date{}
+\maketitle
+
+\section*{Kružnica}
+
+Ak je impérium kružnica, každý systém musí mať iba susedný systém, ktorý je na
+kružnici za ním a systém, ktorý je na kružnici pred ním. V kružnici musí byť
+tak každý systém predchodca aj nasledovateľ nejakého iného systému. Ak bude mať
+každý systém stupeň $2$, teda je na kružnici predchodca aj nasledovateľ, vieme
+povedať, že impérium je kružnica. Z toho vyplíva, že ak nejaký systém
+nemá dvoch susedov, impérium kružnica nie je, pretože impérium buď niekde
+končí, alebo nejaký zo systémov má viac ako dvoch susedov a to nemôže nastať. 
+
+Keďže neveštíme žiadne bity, pre toto riešenie je $k=0$.
+
+\begin{python}
+# ak pocet susedov nejakeho zo systemov nie je 2, imperium nie je kruznica
+if stupen != 2: return NIE
+
+# pockame a ak nikto neodpovedal nie, teda vesmir nie je ruzovy, odpoved je ANO
+if ruzovy_vesmir(): return NIE
+return ANO
+\end{python}
+
+\section*{Perfektné párovanie}
+
+Vieme, že perfektne parovanie môže existovať iba v grafe s párnym počtom
+vrcholov. Ak teda v impériu nie je počet systémov párny, rovno odpovedáme NIE.
+
+Najprv si každý systém vyveští index jeho páru, ktorý následne pošle všetkym
+jeho susediacim systémom. Ak systém po roku dostane od práve jedného susedného 
+systému rovnaký index ako má on, neodpovedá NIE. V opačnom prípade odpovedá
+NIE, keďže buď nemá pár, alebo sú v jeho páre viac ako $2$ systémy a to nemôže
+nastať, keďže v páre môžu byť len $2$ systémy.
+
+Párovanie existuje len vtedy, ak je možné nájsť každému systému práve jedného
+suseda s rovnakým párom ako má daný systém. Indexy párov pre každý systém
+nám vyveštia veštci, takže ak je možné túto podmienku splniť, vždy ju splnia,
+pretože ak by vyveštili nejakému systému nesprávny index, zistili by sme to
+vďaka vyvešteným indexom susedov daného impéria. Ak by nejaký systém mal
+nesprávny index, teda by napríklad ani jeden jeho sused nemal rovnaký index,
+tento systém by odpovedal NIE a celková odpoveď by kvôli tomu bola tiež NIE.
+Ak by sa to nestalo a nikto by neodpovedal NIE, celková odpoveď by bola ANO.
+
+Pre tento algoritmus používame $k=\lceil log_2 (n / 2) \rceil$, pretože veštíme
+index páru pre každý systém a párov môže byť maximálne $n/2$ (podiel je vždy
+celé číslo, keďže ak počet systémov je nepárny, párovanie neexistuje).
+
+\begin{python}
+# ak je pocet systemov neparny, prefektne parovanie neexistuje
+if N % 2 != 0: return NIE
+# vyvestime si index nasej dvojice parovania
+p = vyvesti_cislo(N // 2)
+if p >= N // 2: return NIE
+
+# posleme nas vyvesteny index vsetkym nasim susedom
+for i in range(stupen):
+    outbox[i] = p
+
+# zistime ci presne jeden nas sused je s nami v dvojici
+pocet = 0
+for i in range(stupen):
+    if inbox[i] == p:
+        pocet += 1
+
+# ak nie je presne jeden nas susedny system s nami v dvojici, odpoved je NIE
+if pocet != 1: return NIE
+
+# pockame kym bude vesmir ruzovy, ak niekto mal odpoved NIE, perfektne
+# parovanie neexistuje, inak mozeme povedat ze odpoved je ANO
+if ruzovy_vesmir(): return NIE
+return ANO
+\end{python}
+
+\section*{Hamiltonovská kružnica}
+
+Pre Hamiltonovskú kružnicu platí to isté čo pre normálnu kružnicu, akurát je
+možné, aby bol systém susedný aj s inými systémami okrem jeho predchodcu a 
+následovateľa. Ak teda každý systém bude mať predchodcu a nasledovateľa na
+kružnici, impérium je Hamiltonovská kružnica.
+
+Na začiatku si každý systém vyveští svoj index na kružnici, ktorý následne
+pošle všetkým svojim susedom. Systém po roku tak tiež dostane indexy všetkých 
+svojich susedov. Ak medzi nimi bude index o jedna väčší ako index daného
+systému, neodpovie NIE. V opačnom prípade odpovie NIE, pretože na kružnici
+tento systém nemá nasledovateľa. Stačí nám zistiť, že každý systém je
+nasledovateľ, pretože ak je každý nasledovateľ, každý je aj predchodca.
+
+Ak je impérium Hamiltonovská kružnica, každému systému bude vyveštený index
+tak, aby bol o $1$ menší ako index jeho nasledovateľa na kružnici. Ak to platí
+pre všetky systémy, nikto neodpovie NIE a vieme, že impérium je Hamiltonovská
+kružnica. Ak impérium Hamiltonovská kružnica nie je, jeden zo systémov bude
+musieť mať za susedov iba systémy, ktoré majú iných predchodcov ako je daný
+systém a teda ich index nie je o $1$ väčší ako index daného systému. Tento
+systém odpovie NIE a tak aj celková odpoveď bude NIE.
+
+Pre tento algoritmus je $k=\lceil log_2 n \rceil$, pretože každý systém si
+vyveští jeho index na kružnici ktorý môže byť od $0$ po $n-1$.
+
+\begin{python}
+# ak ma nejaky system menej ako 2 susedov, imperium nie je kruznica, teda
+# nemoze byt ani hamiltonovska kruznica
+if stupen < 2: return NIE
+
+# vyvestime si nas index na kruznici
+p = vyvesti_cislo(N)
+if p >= N: return NIE
+
+# posleme nas vyvesteny index vsetkym nasim susedom
+for i in range(stupen):
+    outbox[i] = p
+
+# zistime ci je jeden z nasich susedov nas nasledovatel na kruznici
+nasledovatel = False
+for i in range(stupen):
+    if inbox[i] == (p + 1) % N:
+        nasledovatel = True
+
+# ak nemame nasledovatela odpoved je NIE 
+if not nasledovatel: return NIE
+
+# pockame kym bude vesmir ruzovy, ak niekto mal odpoved NIE, imperium nie je
+# hamilotonovska kruznica, inak mozeme povedat ze odpoved je ANO
+if ruzovy_vesmir(): return NIE
+return ANO
+
+
+\end{python}
+
+\end{document}
